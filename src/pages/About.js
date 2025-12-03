@@ -1,5 +1,5 @@
 // src/components/AboutUsSection.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FaLaptopCode,
@@ -11,7 +11,10 @@ import useTheme from "../hooks/useTheme";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import Confetti from "react-confetti";
+import Fireworks from "react-canvas-confetti/dist/presets/fireworks";
 
+import { AnimatePresence } from "framer-motion";
 // Fix default marker icon issue (Leaflet requires this in React)
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -22,8 +25,59 @@ L.Icon.Default.mergeOptions({
   shadowUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
+
 const AboutUsSection = () => {
   const [darkMode] = useTheme();
+  const [showSpinWheel, setShowSpinWheel] = useState(false);
+  const [hasSpun, setHasSpun] = useState(false);
+  const [prize, setPrize] = useState("");
+  const [rotation, setRotation] = useState(0);
+  const [celebrate, setCelebrate] = useState(false);
+  const [showResultPopup, setShowResultPopup] = useState(false);
+  const [wheelSize, setWheelSize] = useState(300);
+
+  // Prize list with icons
+  const prizes = [
+    { text: "50 K Coins", icon: "🪙" },
+    { text: "New Shoes", icon: "👟" },
+    { text: "Better Luck Next Time", icon: "💔" },
+    { text: "Movie Tickets", icon: "🎬" },
+    { text: "Gadgets", icon: "📱" },
+    { text: "₹5", icon: "💸" },
+  ];
+
+  useEffect(() => {
+    const spun = localStorage.getItem("hasSpunWheel");
+    if (!spun) setShowSpinWheel(true);
+
+    const resizeHandler = () =>
+      setWheelSize(Math.min(window.innerWidth * 0.7, 350));
+    resizeHandler();
+    window.addEventListener("resize", resizeHandler);
+    return () => window.removeEventListener("resize", resizeHandler);
+  }, []);
+
+  const spinWheel = () => {
+    const prizeIndex = Math.floor(Math.random() * prizes.length);
+    const degreesPerPrize = 360 / prizes.length;
+
+    const finalRotation =
+      360 * 8 + prizeIndex * degreesPerPrize + degreesPerPrize / 2;
+
+    setRotation(finalRotation);
+
+    setTimeout(() => {
+      setHasSpun(true);
+      setPrize(prizes[prizeIndex]);
+      localStorage.setItem("hasSpunWheel", "true");
+      setCelebrate(true);
+      setShowResultPopup(true);
+
+      setTimeout(() => setCelebrate(false), 4000);
+    }, 4700);
+  };
+
+  const textColor = darkMode ? "text-white" : "text-gray-900";
 
   // ------------------- Animation Variants -------------------
   const slideInLeft = {
@@ -116,42 +170,11 @@ const AboutUsSection = () => {
   ];
 
   // ------------------- Ads Data -------------------
-  const ads = [
-    {
-      title: "Ad Space 1",
-      description: "Your advertisement here. Replace dynamically later.",
-      icon: (
-        <FaAd
-          size={30}
-          className={darkMode ? "text-yellow-400" : "text-yellow-600"}
-        />
-      ),
-      animation: waveVariants.left,
-    },
-    {
-      title: "Ad Space 2",
-      description: "Your advertisement here. Replace dynamically later.",
-      icon: (
-        <FaAd
-          size={30}
-          className={darkMode ? "text-yellow-400" : "text-yellow-600"}
-        />
-      ),
-      animation: waveVariants.top,
-    },
-    {
-      title: "Ad Space 3",
-      description: "Your advertisement here. Replace dynamically later.",
-      icon: (
-        <FaAd
-          size={30}
-          className={darkMode ? "text-yellow-400" : "text-yellow-600"}
-        />
-      ),
-      animation: waveVariants.right,
-    },
-  ];
-
+  const adData = {
+    title: "Boost Your Business with Targeted Ads",
+    description:
+      "Reach thousands of potential customers and increase conversions with our premium advertising service. Simple, fast, and effective.",
+  };
   // ------------------- Contact Form State -------------------
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -172,6 +195,122 @@ const AboutUsSection = () => {
     <section
       className={`pt-32 md:pt-36 pb-16 transition-colors duration-500 ${sectionBg} min-h-screen`}
     >
+      <AnimatePresence>
+        {showSpinWheel && !hasSpun && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white dark:bg-gray-800 rounded-3xl p-6 relative w-[92%] max-w-md text-center shadow-2xl"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+            >
+              <h2 className={`text-2xl font-bold mb-4 ${textColor}`}>
+                🎉 Spin the Wheel 🎉
+              </h2>
+
+              <div
+                className="relative flex items-center justify-center rounded-full border-8 border-green-600 overflow-hidden"
+                style={{ width: wheelSize, height: wheelSize }}
+              >
+                {prizes.map((p, i) => {
+                  const rotateDeg = (360 / prizes.length) * i;
+                  return (
+                    <div
+                      key={i}
+                      className="absolute w-full h-full flex justify-center items-start pt-3"
+                      style={{ transform: `rotate(${rotateDeg}deg)` }}
+                    >
+                      <span
+                        className="text-sm font-bold"
+                        style={{
+                          transform: `rotate(-${rotateDeg}deg)`,
+                          color: "#1f2937",
+                        }}
+                      >
+                        {p.icon} {p.text}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                <motion.div
+                  className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 via-green-400 to-pink-400 opacity-25"
+                  animate={{ rotate: rotation }}
+                  transition={{ duration: 5, ease: "easeOut" }}
+                />
+
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-12 bg-red-500 rounded-b-xl"></div>
+              </div>
+
+              <button
+                onClick={spinWheel}
+                className="mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md text-lg font-semibold"
+              >
+                🔄 Spin
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* RESULT POPUP AFTER WIN */}
+      <AnimatePresence>
+        {showResultPopup && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-60"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white dark:bg-gray-800 rounded-3xl p-7 text-center shadow-xl max-w-sm w-[85%]"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+            >
+              <h2 className={`text-3xl font-bold ${textColor}`}>You Won!!</h2>
+
+              <motion.div
+                className="mt-4 text-6xl"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1.3 }}
+                transition={{ duration: 0.6 }}
+              >
+                {prize.icon}
+              </motion.div>
+
+              <p className={`mt-2 text-xl font-bold ${textColor}`}>
+                {prize.text}
+              </p>
+
+              <button
+                className="mt-5 px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md"
+                onClick={() => setShowResultPopup(false)}
+              >
+                Close
+              </button>
+            </motion.div>
+
+            {celebrate && (
+              <>
+                <Confetti
+                  width={window.innerWidth}
+                  height={window.innerHeight}
+                  numberOfPieces={300}
+                  gravity={0.25}
+                />
+                <Fireworks />
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         {/* ------------------- About Us Heading ------------------- */}
         <motion.div
@@ -181,11 +320,10 @@ const AboutUsSection = () => {
           viewport={{ once: true }}
           transition={{ duration: 1 }}
         >
-          <h2
-            className={`text-4xl md:text-5xl font-bold transition-colors duration-500 ${headingColor}`}
-          >
+          <h2 className="text-4xl md:text-5xl font-bold transition-colors duration-500 text-[#8D5A3A]">
             About Us
           </h2>
+
           <div
             className={`w-24 h-1 mx-auto mt-2 rounded-full transition-colors duration-500 ${headingColor}`}
           ></div>
@@ -218,12 +356,12 @@ const AboutUsSection = () => {
               viewport={{ once: true }}
               transition={{ duration: 1.2 }}
             >
-              <span className="font-semibold text-green-500">
+              <span className="font-semibold text-[#8D5A3A]">
                 KDASTSHO Fintech Solutions Private Limited
               </span>{" "}
-              is a progressive technology firm committed to providing
-              straightforward, astute, and creative digital solutions to SMEs,
-              MSMEs, and individuals.
+              develops impactful products and services for small and medium
+              businesses and individuals, empowering their daily lives through
+              seamless, technology-driven solutions.
             </motion.p>
           </motion.div>
 
@@ -238,15 +376,15 @@ const AboutUsSection = () => {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <h3 className="text-2xl font-bold mb-4 text-green-500">Vision</h3>
+            <h3 className="text-2xl font-bold mb-4 text-[#8D5A3A]">Vision</h3>
+
             <p>
-              Our goal is to provide easy access to technology and financial
-              empowerment for everyone—regardless of business size or
-              experience. We develop digital tools and services that solve real
-              business and financial challenges, enabling efficient operations,
-              confident money management, and sustainable financial growth. Our
-              focus is on long-term value through software solutions, tax
-              consultancy, digital automation, and future investment ecosystems.
+              Clear & Concise Vision Statement “Kdastsho’s long-term vision is
+              to build products and services that create wealth and prosperity
+              for individuals and businesses of all sizes. Through technology,
+              we enable faster, more robust, and impactful business outcomes,
+              contributing to economic growth at both company and national
+              levels.
             </p>
           </motion.div>
         </div>
@@ -260,9 +398,10 @@ const AboutUsSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 1 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-green-800">
+            <h2 className="text-4xl md:text-5xl font-bold text-[#8D5A3A]">
               Services We Offer
             </h2>
+
             <div className="w-24 h-1 mx-auto mt-2 rounded-full bg-green-800"></div>
           </motion.div>
 
@@ -305,40 +444,49 @@ const AboutUsSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 1 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-green-800">
-              Sponsored Ads
+            <h2 className="text-4xl md:text-5xl font-bold text-[#8D5A3A]">
+              Sponsored Ad
             </h2>
             <div className="w-24 h-1 mx-auto mt-2 rounded-full bg-green-800"></div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {ads.map((ad, index) => (
-              <motion.div
-                key={index}
-                className={`p-6 rounded-lg shadow-lg flex flex-col justify-between ${cardBg} ${cardText}`}
-                variants={ad.animation}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.3 }}
+          <motion.div
+            className={`rounded-2xl overflow-hidden shadow-xl border ${cardBg} ${cardText}`}
+            animate={{ y: [0, -12, 0] }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              repeatType: "mirror",
+              ease: "easeInOut",
+            }}
+          >
+            <div className="w-full">
+              <img
+                src="/images/Ad.png" // update path
+                alt="Sponsored Ad"
+                className="w-full aspect-[1200/628] object-cover"
+              />
+            </div>
+
+            <div className="p-6 md:p-8 flex flex-col">
+              <h3 className="text-2xl md:text-3xl font-bold mb-3">
+                {adData.title}
+              </h3>
+              <p className="text-base md:text-lg mb-6 leading-relaxed">
+                {adData.description}
+              </p>
+
+              <motion.button
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0px 4px 15px rgba(0,0,0,0.3)",
+                }}
+                className={`mt-auto self-start px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${buttonBg} ${buttonText}`}
               >
-                <div className="w-12 h-12 flex items-center justify-center rounded-full mb-4 bg-green-100">
-                  {ad.icon}
-                </div>
-                <h3 className="text-xl font-bold mb-3">{ad.title}</h3>
-                <p className="text-sm mb-6">{ad.description}</p>
-                <motion.button
-                  whileHover={{
-                    scale: 1.05,
-                    boxShadow: "0px 4px 15px rgba(0,0,0,0.3)",
-                  }}
-                  className={`mt-auto ${buttonBg} ${buttonText} px-4 py-2 rounded transition-all duration-300`}
-                >
-                  Learn More
-                </motion.button>
-              </motion.div>
-            ))}
-          </div>
+                Learn More
+              </motion.button>
+            </div>
+          </motion.div>
         </section>
 
         {/* ------------------- Contact Us Section ------------------- */}
@@ -350,9 +498,10 @@ const AboutUsSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 1 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-green-800">
+            <h2 className="text-4xl md:text-5xl font-bold text-[#8D5A3A]">
               Contact Us
             </h2>
+
             <div className="w-24 h-1 mx-auto mt-2 rounded-full bg-green-800"></div>
           </motion.div>
 
@@ -407,7 +556,7 @@ const AboutUsSection = () => {
                     scale: 1.05,
                     boxShadow: "0px 4px 15px rgba(0,0,0,0.3)",
                   }}
-                  className={`bg-stone-800 text-white px-6 py-2 rounded transition-all duration-300`}
+                  className="bg-[#8D5A3A] hover:bg-[#7a4b2f] text-white px-6 py-2 rounded transition-all duration-300"
                   type="submit"
                 >
                   Send
@@ -428,7 +577,7 @@ const AboutUsSection = () => {
                 center={[28.6139, 77.209]} // Default coordinates (New Delhi)
                 zoom={12}
                 scrollWheelZoom={false}
-                className="w-full h-full"
+                className="w-full h-96 rounded-lg shadow-lg relative z-0"
               >
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

@@ -78,7 +78,7 @@ const ComplexSolutionsPage = () => {
                 }}
                 className="bg-[#8D5A3A] hover:bg-[#7a4b2f] text-white px-6 py-3 rounded-lg shadow-md transition-all duration-300"
               >
-                <Link to="/register">Register Now</Link>
+                <Link to="/softgetstart">View Solutions</Link>
               </motion.button>
             </div>
 

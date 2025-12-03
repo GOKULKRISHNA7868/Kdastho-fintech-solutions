@@ -25,15 +25,17 @@ const SmartInvestmentHero = () => {
           <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300">
             Smart strategies designed to secure your financial future.
           </p>
-          <motion.button
-            whileHover={{
-              scale: 1.05,
-              boxShadow: "0px 5px 15px rgba(0,0,0,0.3)",
-            }}
-            className="bg-[#8D5A3A] hover:bg-[#7a4b2f] text-white px-6 py-3 rounded-lg shadow-md transition-all duration-300"
-          >
-            <Link to="/register">Register Now</Link>
-          </motion.button>
+          <Link to="/investments2">
+            <motion.button
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0px 5px 15px rgba(0,0,0,0.3)",
+              }}
+              className="bg-[#8D5A3A] hover:bg-[#7a4b2f] text-white px-6 py-3 rounded-lg shadow-md transition-all duration-300"
+            >
+              View Solutions
+            </motion.button>
+          </Link>
         </motion.div>
 
         {/* Right: Image with decorative shapes */}

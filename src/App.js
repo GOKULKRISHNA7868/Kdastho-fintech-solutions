@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-
+import Myprofile from "./pages/Myprofile";
+import MyApplications from "./pages/MyApplications";
 import About from "./pages/About";
 import Careers from "./pages/Careers";
 import Contact from "./pages/Contact";
@@ -14,6 +15,9 @@ import RegistrationForm from "./components/RegistrationForm";
 import LoginCard from "./components/LoginCard";
 import SignUpForm from "./components/SignUpForm";
 import Applyform from "./components/Applyform";
+import About1 from "./pages/About1";
+import Softgetstart from "./pages/Services/Softgetstart";
+import Investments2 from "./pages/Services/Investments2";
 function App() {
   // global dark mode state
   const [darkMode, setDarkMode] = useState(() => {
@@ -35,19 +39,25 @@ function App() {
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <Routes>
+        <Route path="/" element={<About darkMode={darkMode} />} />
+        <Route path="/Myprofile" element={<Myprofile darkMode={darkMode} />} />
+        <Route path="/MyApplications" element={<MyApplications />} />
         <Route path="/Blog" element={<Blog darkMode={darkMode} />} />
-        <Route path="/about" element={<About darkMode={darkMode} />} />
+        <Route path="/About1" element={<About1 darkMode={darkMode} />} />
         <Route path="/Careers" element={<Careers darkMode={darkMode} />} />
         <Route path="/contact" element={<Contact darkMode={darkMode} />} />
         <Route path="/register" element={<RegistrationForm />} />
         <Route path="/signup" element={<SignUpForm />} />
         <Route path="/Applyform" element={<Applyform />} />
+        <Route path="/softgetstart" element={<Softgetstart />} />
+
         <Route
           path="/services/software-development"
           element={<SoftwareDevelopment />}
         />
         <Route path="/services/company-tax" element={<CompanyTax />} />
         <Route path="/services/investments" element={<Investments />} />
+        <Route path="/investments2" element={<Investments2 />} />
 
         <Route path="/login" element={<LoginCard />} />
       </Routes>

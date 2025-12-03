@@ -130,9 +130,11 @@ export default function CareersPage() {
 
                   {/* ========= Apply Button with Navigation ========= */}
                   <button
-                    className="bg-[#1E4E45] hover:bg-[#236355] text-white px-5 py-2 rounded-full flex items-center gap-2 self-start transition-all duration-300"
+                    className="bg-[#8D5A3A] hover:bg-[#7a4b2f] text-white px-5 py-2 rounded-full flex items-center gap-2 self-start transition-all duration-300"
                     onClick={() =>
-                      navigate("/Applyform", { state: { role: job.title } })
+                      navigate("/Applyform", {
+                        state: { role: job.title, description: job.desc },
+                      })
                     }
                   >
                     Apply <FaArrowRight className="text-sm" />

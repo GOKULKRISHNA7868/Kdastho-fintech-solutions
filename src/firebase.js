@@ -6,13 +6,13 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage"; // ✅ add this line
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD65DWq_F6Z3r9jcPuj4OmRHHManZBV-sQ",
-  authDomain: "gokulwebsite-de84a.firebaseapp.com",
-  projectId: "gokulwebsite-de84a",
-  storageBucket: "gokulwebsite-de84a.appspot.com", // ✅ fix: corrected the storageBucket URL
-  messagingSenderId: "1029154691068",
-  appId: "1:1029154691068:web:5dd1ffa25eb0fcca640479",
-  measurementId: "G-4PM2KQJVVD"
+  apiKey: "AIzaSyAvPql2CnMOQa3lLhNblPghtGIDOrimveU",
+  authDomain: "web-data-47f85.firebaseapp.com",
+  projectId: "web-data-47f85",
+  storageBucket: "web-data-47f85.firebasestorage.app",
+  messagingSenderId: "573976663778",
+  appId: "1:573976663778:web:f0d4c24207344750c370bb",
+  measurementId: "G-TRGW0KNL3J",
 };
 
 const app = initializeApp(firebaseConfig);

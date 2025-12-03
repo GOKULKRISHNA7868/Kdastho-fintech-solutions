@@ -46,13 +46,12 @@ const ContactUsSection = () => {
   const inputBg = darkMode
     ? "bg-gray-700 text-gray-100"
     : "bg-white text-gray-800";
-  const buttonBg = darkMode ? "bg-green-600" : "bg-stone-800";
-  const buttonText = "text-white";
 
   return (
     <section
-      className={`pt-32 md:pt-36 pb-16 transition-colors duration-500 ${sectionBg}`}
+      className={`relative z-0 pt-44 md:pt-48 pb-16 transition-colors duration-500 ${sectionBg}`}
     >
+      {/* Increased pt from pt-32/36 → pt-44/48 to avoid navbar overlap */}
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         {/* Heading */}
         <motion.div
@@ -62,7 +61,7 @@ const ContactUsSection = () => {
           viewport={{ once: true }}
           transition={{ duration: 1 }}
         >
-          <h2 className={`text-4xl md:text-5xl font-bold ${headingColor}`}>
+          <h2 className="text-4xl md:text-5xl font-bold text-[#8D5A3A]">
             Contact Us
           </h2>
           <div
@@ -122,7 +121,7 @@ const ContactUsSection = () => {
                   scale: 1.05,
                   boxShadow: "0px 4px 15px rgba(0,0,0,0.3)",
                 }}
-                className={`px-6 py-2 rounded transition-all duration-300 ${buttonBg} ${buttonText}`}
+                className="bg-[#8D5A3A] hover:bg-[#7a4b2f] text-white px-6 py-2 rounded transition-all duration-300"
                 type="submit"
               >
                 Send
@@ -141,7 +140,7 @@ const ContactUsSection = () => {
               center={[28.6139, 77.209]}
               zoom={13}
               scrollWheelZoom={false}
-              className="w-full h-96 rounded-lg shadow-lg"
+              className="w-full h-96 rounded-lg shadow-lg relative z-0"
             >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
