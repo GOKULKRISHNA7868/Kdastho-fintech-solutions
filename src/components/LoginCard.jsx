@@ -40,7 +40,7 @@ const LoginCard = () => {
         console.log("User Data:", docSnap.data());
       }
 
-      navigate("/profile"); // redirect after login
+      navigate("/"); // redirect after login
     } catch (error) {
       setErrorMsg(
         error.message.includes("auth")

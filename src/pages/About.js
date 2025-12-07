@@ -13,6 +13,8 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import Confetti from "react-confetti";
 import Fireworks from "react-canvas-confetti/dist/presets/fireworks";
+import { db } from "../firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 import { AnimatePresence } from "framer-motion";
 // Fix default marker icon issue (Leaflet requires this in React)
@@ -170,16 +172,82 @@ const AboutUsSection = () => {
   ];
 
   // ------------------- Ads Data -------------------
+  const [showForm, setShowForm] = useState(false);
+  const [formName, setFormName] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formMessage, setFormMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const handleAdSubmit = async () => {
+    if (!formName || !formPhone || !formMessage) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await addDoc(collection(db, "ads_info"), {
+        name: formName,
+        phone: formPhone,
+        message: formMessage,
+        timestamp: serverTimestamp(),
+      });
+
+      alert("Submitted successfully!");
+      setFormName("");
+      setFormPhone("");
+      setFormMessage("");
+      setShowForm(false);
+    } catch (err) {
+      alert("Error submitting data!");
+      console.error(err);
+    }
+    setSubmitting(false);
+  };
+
   const adData = {
     title: "Boost Your Business with Targeted Ads",
     description:
       "Reach thousands of potential customers and increase conversions with our premium advertising service. Simple, fast, and effective.",
   };
   // ------------------- Contact Form State -------------------
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+
+  // 🔥 Submit handler - store in Firebase
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!firstName || !lastName || !email || !phone || !message) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "contact_details"), {
+        firstName,
+        lastName,
+        email,
+        phone,
+        message,
+        createdAt: serverTimestamp(),
+      });
+
+      alert("Message submitted successfully!");
+
+      // Clear input fields
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setPhone("");
+      setMessage("");
+    } catch (error) {
+      console.error("Error saving contact details:", error);
+      alert("Failed to submit message!");
+    }
+  };
 
   // ------------------- Color Classes -------------------
   const sectionBg = darkMode ? "bg-gray-900" : "bg-[#F7F1EC]";
@@ -189,7 +257,9 @@ const AboutUsSection = () => {
   const buttonBg = darkMode ? "bg-green-600" : "bg-stone-800";
   const buttonText = "text-white";
   const formBg = darkMode ? "bg-gray-800" : "bg-[#F7F1EC]";
-  const formInputBg = "bg-white text-gray-800";
+  const inputBg = darkMode
+    ? "bg-gray-700 text-gray-100"
+    : "bg-white text-gray-800";
 
   return (
     <section
@@ -213,23 +283,34 @@ const AboutUsSection = () => {
                 🎉 Spin the Wheel 🎉
               </h2>
 
-              <div
-                className="relative flex items-center justify-center rounded-full border-8 border-green-600 overflow-hidden"
+              {/* 1. Wheel Container - Now a motion.div */}
+              <motion.div
+                className="relative rounded-full border-8 border-green-600 overflow-hidden"
                 style={{ width: wheelSize, height: wheelSize }}
+                // *** THE KEY CHANGE: APPLY ROTATION TO THE WHOLE WHEEL ***
+                animate={{ rotate: rotation }}
+                transition={{ duration: 5, ease: "easeOut" }} // Fast to slow stop
               >
+                {/* 2. Prize Segments - These are now children of the rotating div */}
                 {prizes.map((p, i) => {
                   const rotateDeg = (360 / prizes.length) * i;
                   return (
                     <div
                       key={i}
                       className="absolute w-full h-full flex justify-center items-start pt-3"
-                      style={{ transform: `rotate(${rotateDeg}deg)` }}
+                      // The prize division line background (optional, but shows segments)
+                      style={{
+                        transform: `rotate(${rotateDeg}deg)`,
+                        backgroundColor: i % 2 === 0 ? "#fef08a" : "#dcfce7", // Light yellow/green background for segments
+                      }}
                     >
                       <span
-                        className="text-sm font-bold"
+                        className="text-sm font-bold absolute"
+                        // Must rotate back to stay upright relative to the screen
                         style={{
                           transform: `rotate(-${rotateDeg}deg)`,
                           color: "#1f2937",
+                          marginTop: "20px", // Push text down a bit
                         }}
                       >
                         {p.icon} {p.text}
@@ -238,13 +319,16 @@ const AboutUsSection = () => {
                   );
                 })}
 
-                <motion.div
-                  className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 via-green-400 to-pink-400 opacity-25"
-                  animate={{ rotate: rotation }}
-                  transition={{ duration: 5, ease: "easeOut" }}
-                />
+                {/* 3. CENTER HUB - Place this on top of the segments */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-12 h-12 rounded-full bg-green-700 border-4 border-white shadow-lg z-10"></div>
+                </div>
+              </motion.div>
+              {/* END OF WHEEL CONTAINER */}
 
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-12 bg-red-500 rounded-b-xl"></div>
+              {/* 4. POINTER/INDICATOR - Fixed in place above the wheel */}
+              <div className="absolute top-[28%] left-1/2 transform -translate-x-1/2 -translate-y-full">
+                <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-b-[20px] border-l-transparent border-r-transparent border-b-red-600"></div>
               </div>
 
               <button
@@ -258,7 +342,7 @@ const AboutUsSection = () => {
         )}
       </AnimatePresence>
 
-      {/* RESULT POPUP AFTER WIN */}
+      {/* RESULT POPUP AFTER WIN (Rest of your code remains the same) */}
       <AnimatePresence>
         {showResultPopup && (
           <motion.div
@@ -450,6 +534,88 @@ const AboutUsSection = () => {
             <div className="w-24 h-1 mx-auto mt-2 rounded-full bg-green-800"></div>
           </motion.div>
 
+          {/* POPUP — will show when user clicks Contact Now */}
+          {showForm && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                initial={{ scale: 0.7 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.7 }}
+                transition={{ duration: 0.35 }}
+                className={`w-full max-w-md p-6 rounded-2xl shadow-xl ${
+                  darkMode
+                    ? "bg-[#101010] text-white"
+                    : "bg-white text-gray-900"
+                }`}
+              >
+                <h3 className="text-2xl font-bold mb-4 text-center">
+                  Contact Now
+                </h3>
+
+                <div className="flex flex-col gap-3">
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    className={`p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-black border-gray-600 text-white"
+                        : "bg-gray-100 border-gray-300"
+                    }`}
+                  />
+
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    value={formPhone}
+                    onChange={(e) => setFormPhone(e.target.value)}
+                    className={`p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-black border-gray-600 text-white"
+                        : "bg-gray-100 border-gray-300"
+                    }`}
+                  />
+
+                  <textarea
+                    placeholder="Message..."
+                    rows="4"
+                    value={formMessage}
+                    onChange={(e) => setFormMessage(e.target.value)}
+                    className={`p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-black border-gray-600 text-white"
+                        : "bg-gray-100 border-gray-300"
+                    }`}
+                  />
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    className="flex-1 py-3 rounded-lg font-semibold bg-gradient-to-r from-[#F69B2E] to-[#DB6A2E] text-white hover:scale-105 transition-all"
+                    onClick={handleAdSubmit}
+                    disabled={submitting}
+                  >
+                    {submitting ? "Submitting..." : "Submit"}
+                  </button>
+
+                  <button
+                    className="flex-1 py-3 rounded-lg font-semibold bg-gray-400 hover:bg-gray-500 transition-all"
+                    onClick={() => setShowForm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* AD CARD */}
           <motion.div
             className={`rounded-2xl overflow-hidden shadow-xl border ${cardBg} ${cardText}`}
             animate={{ y: [0, -12, 0] }}
@@ -462,7 +628,7 @@ const AboutUsSection = () => {
           >
             <div className="w-full">
               <img
-                src="/images/Ad.png" // update path
+                src="/images/Ad.png"
                 alt="Sponsored Ad"
                 className="w-full aspect-[1200/628] object-cover"
               />
@@ -476,14 +642,16 @@ const AboutUsSection = () => {
                 {adData.description}
               </p>
 
+              {/* NEW CONTACT BUTTON */}
               <motion.button
+                onClick={() => setShowForm(true)}
                 whileHover={{
                   scale: 1.05,
                   boxShadow: "0px 4px 15px rgba(0,0,0,0.3)",
                 }}
                 className={`mt-auto self-start px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${buttonBg} ${buttonText}`}
               >
-                Learn More
+                Contact Now
               </motion.button>
             </div>
           </motion.div>
@@ -501,10 +669,12 @@ const AboutUsSection = () => {
             <h2 className="text-4xl md:text-5xl font-bold text-[#8D5A3A]">
               Contact Us
             </h2>
-
-            <div className="w-24 h-1 mx-auto mt-2 rounded-full bg-green-800"></div>
+            <div
+              className={`w-24 h-1 mx-auto mt-2 rounded-full ${headingColor}`}
+            ></div>
           </motion.div>
 
+          {/* Form & Map */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Contact Form */}
             <motion.div
@@ -514,40 +684,40 @@ const AboutUsSection = () => {
               whileInView="visible"
               viewport={{ once: true }}
             >
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="flex flex-col md:flex-row gap-4">
                   <input
                     type="text"
                     placeholder="First Name"
-                    className={`w-full rounded p-2 border border-gray-300 ${formInputBg}`}
-                    value={fullName.split(" ")[0] || ""}
-                    onChange={(e) => setFullName(e.target.value)}
+                    className={`w-full rounded p-2 border border-gray-300 ${inputBg}`}
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                   />
                   <input
                     type="text"
                     placeholder="Last Name"
-                    className={`w-full rounded p-2 border border-gray-300 ${formInputBg}`}
-                    value={fullName.split(" ")[1] || ""}
-                    onChange={(e) => setFullName(e.target.value)}
+                    className={`w-full rounded p-2 border border-gray-300 ${inputBg}`}
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                   />
                 </div>
                 <input
                   type="email"
                   placeholder="Email"
-                  className={`w-full rounded p-2 border border-gray-300 ${formInputBg}`}
+                  className={`w-full rounded p-2 border border-gray-300 ${inputBg}`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <input
                   type="tel"
                   placeholder="Phone Number"
-                  className={`w-full rounded p-2 border border-gray-300 ${formInputBg}`}
+                  className={`w-full rounded p-2 border border-gray-300 ${inputBg}`}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
                 <textarea
                   placeholder="Message"
-                  className={`w-full rounded p-2 border border-gray-300 ${formInputBg} h-32 resize-none`}
+                  className={`w-full rounded p-2 border border-gray-300 ${inputBg} h-32 resize-none`}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
@@ -564,27 +734,25 @@ const AboutUsSection = () => {
               </form>
             </motion.div>
 
-            {/* Map Placeholder */}
+            {/* Map */}
             <motion.div
-              className="rounded-lg shadow-lg overflow-hidden"
-              style={{ minHeight: "400px" }}
               variants={slideInRight}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
             >
               <MapContainer
-                center={[28.6139, 77.209]} // Default coordinates (New Delhi)
-                zoom={12}
+                center={[28.6139, 77.209]}
+                zoom={13}
                 scrollWheelZoom={false}
                 className="w-full h-96 rounded-lg shadow-lg relative z-0"
               >
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution="&copy; OpenStreetMap contributors"
                 />
                 <Marker position={[28.6139, 77.209]}>
-                  <Popup>Default Location</Popup>
+                  <Popup>KDASTSHO Fintech Solutions Pvt Ltd</Popup>
                 </Marker>
               </MapContainer>
             </motion.div>

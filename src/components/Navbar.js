@@ -13,6 +13,7 @@ export default function Navbar() {
   const [serviceOpen, setServiceOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // 🔥 admin check state
   const location = useLocation();
   const navigate = useNavigate();
   const db = getFirestore();
@@ -20,35 +21,42 @@ export default function Navbar() {
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
-  // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
 
-  // Fetch user data after login
+  // Fetch user details + check admin
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const uid = currentUser.uid;
-        const userDocRef = doc(db, "users", uid);
-        const userSnap = await getDoc(userDocRef);
-        if (userSnap.exists()) {
-          setUser({
-            uid,
-            firstName: userSnap.data().firstName,
-          });
-        }
-      } else {
+      if (!currentUser) {
         setUser(null);
+        setIsAdmin(false);
+        return;
       }
+
+      const uid = currentUser.uid;
+      const userDocRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userDocRef);
+
+      const email = currentUser.email?.toLowerCase().trim();
+
+      setUser({
+        uid,
+        firstName: userSnap.exists() ? userSnap.data().firstName : "User",
+      });
+
+      // 🔥 Email-based admin access
+      setIsAdmin(email === "ceo@kdastshofintechsolutions.com");
     });
+
     return () => unsubscribe();
-  }, [auth, db]);
+  }, []);
 
   const navItems = [
     { name: "About", to: "/About1" },
     { name: "Careers", to: "/Careers" },
     { name: "Blog", to: "/Blog" },
+    // ❌ Dashboard removed from public nav — now shown only in user dropdown when admin
     {
       name: "Services",
       dropdown: [
@@ -155,6 +163,8 @@ export default function Navbar() {
               >
                 <FaUserCircle />
               </button>
+
+              {/* USER DROPDOWN */}
               <AnimatePresence>
                 {userDropdown && (
                   <motion.div
@@ -163,27 +173,49 @@ export default function Navbar() {
                     animate="visible"
                     exit="exit"
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-2 bg-white dark:bg-black shadow-xl rounded-xl py-2 w-48 flex flex-col z-50"
+                    className="absolute right-0 mt-2 bg-white dark:bg-black shadow-xl rounded-xl py-2 w-52 flex flex-col z-50"
                   >
+                    {/* My Profile */}
                     <button
                       onClick={() => {
-                        navigate("/Myprofile"); // navigate to the My Profile page
-                        setUserDropdown(false); // close the dropdown after clicking
+                        navigate("/Myprofile");
+                        setUserDropdown(false);
                       }}
                       className="text-left px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md transition-colors"
                     >
                       My Profile
                     </button>
-                    <button
-                      className="text-left px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md"
-                      onClick={() => navigate("/MyApplications")}
-                    >
-                      My Applications
-                    </button>
 
+                    {/* My Applications */}
+                    {!isAdmin && (
+                      <button
+                        onClick={() => {
+                          navigate("/MyApplications");
+                          setUserDropdown(false);
+                        }}
+                        className="text-left px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md transition-colors"
+                      >
+                        My Applications
+                      </button>
+                    )}
+
+                    {/* 🔥 Dashboard visible only for admin */}
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          navigate("/dashboard");
+                          setUserDropdown(false);
+                        }}
+                        className="text-left px-4 py-2 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors mt-1"
+                      >
+                        🛡️ Dashboard
+                      </button>
+                    )}
+
+                    {/* Logout */}
                     <button
                       onClick={handleLogout}
-                      className="text-left px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md"
+                      className="text-left px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md transition-colors mt-1"
                     >
                       Logout
                     </button>
@@ -217,7 +249,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Dropdown Menu */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -226,95 +258,99 @@ export default function Navbar() {
             exit={{ opacity: 0, y: -15 }}
             className="md:hidden bg-[#ceb197] px-6 py-5 mt-3 mx-5 rounded-3xl shadow-xl space-y-2"
           >
-            <>
-              {navItems.map((item, i) =>
-                item.dropdown ? (
-                  <div key={i} className="space-y-1">
-                    <button
-                      onClick={() => setServiceOpen(!serviceOpen)}
-                      className="w-full text-left py-2 px-4 font-semibold text-black rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-                    >
-                      {item.name} ▾
-                    </button>
-                    <AnimatePresence>
-                      {serviceOpen && (
-                        <motion.div
-                          variants={dropdownVariants}
-                          initial="hidden"
-                          animate="visible"
-                          exit="exit"
-                          transition={{ duration: 0.2 }}
-                          className="ml-4 flex flex-col space-y-1"
-                        >
-                          {item.dropdown.map((sub, j) => (
-                            <Link
-                              key={j}
-                              to={sub.to}
-                              onClick={() => setMenuOpen(false)}
-                              className="block py-2 px-4 text-black dark:text-white rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-                            >
-                              {sub.name}
-                            </Link>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ) : (
-                  <Link
-                    key={i}
-                    to={item.to}
-                    onClick={() => setMenuOpen(false)}
-                    className="block py-2 px-4 font-semibold text-black rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    {item.name}
-                  </Link>
-                )
-              )}
-
-              {/* Mobile User Dropdown */}
-              {user && (
-                <div className="mt-2 border-t border-gray-300 dark:border-gray-700 pt-2">
+            {navItems.map((item, i) =>
+              item.dropdown ? (
+                <div key={i} className="space-y-1">
                   <button
-                    onClick={() => setUserDropdown(!userDropdown)}
-                    className="w-full text-left py-2 px-4 font-semibold text-black dark:text-white rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => setServiceOpen(!serviceOpen)}
+                    className="w-full text-left py-2 px-4 font-semibold text-black rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <FaUserCircle /> ▾
+                    {item.name} ▾
                   </button>
                   <AnimatePresence>
-                    {userDropdown && (
+                    {serviceOpen && (
                       <motion.div
                         variants={dropdownVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
                         transition={{ duration: 0.2 }}
-                        className="ml-2 flex flex-col space-y-1 mt-1"
+                        className="ml-4 flex flex-col space-y-1"
                       >
-                        <button
-                          onClick={() => {
-                            navigate("/Myprofile"); // navigate to myprofile page
-                            setUserDropdown(false); // close dropdown after click
-                          }}
-                          className="text-left py-2 px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-                        >
-                          My Profile
-                        </button>
-                        <button className="text-left py-2 px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
-                          My Applications
-                        </button>
-                        <button
-                          onClick={handleLogout}
-                          className="text-left py-2 px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-                        >
-                          Logout
-                        </button>
+                        {item.dropdown.map((sub, j) => (
+                          <Link
+                            key={j}
+                            to={sub.to}
+                            onClick={() => setMenuOpen(false)}
+                            className="block py-2 px-4 text-black dark:text-white rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                          >
+                            {sub.name}
+                          </Link>
+                        ))}
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
-              )}
-            </>
+              ) : (
+                <Link
+                  key={i}
+                  to={item.to}
+                  onClick={() => setMenuOpen(false)}
+                  className="block py-2 px-4 font-semibold text-black rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                >
+                  {item.name}
+                </Link>
+              )
+            )}
+            )}
+            {/* Mobile user dropdown */}
+            {user && (
+              <div className="mt-2 border-t border-gray-300 dark:border-gray-700 pt-2 space-y-1">
+                {/* Profile */}
+                <button
+                  onClick={() => {
+                    navigate("/Myprofile");
+                    setMenuOpen(false);
+                  }}
+                  className="block text-left py-2 px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                >
+                  My Profile
+                </button>
+
+                {!isAdmin && (
+                  <button
+                    onClick={() => {
+                      navigate("/MyApplications");
+                      setMenuOpen(false);
+                    }}
+                    className="block text-left py-2 px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    My Applications
+                  </button>
+                )}
+
+                {/* 🔥 Admin Dashboard only for CEO */}
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      navigate("/dashboard");
+                      setMenuOpen(false);
+                    }}
+                    className="block text-left py-2 px-4 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors font-semibold"
+                  >
+                    🛡️ Dashboard
+                  </button>
+                )}
+
+                {/* Logout */}
+                <button
+                  onClick={handleLogout}
+                  className="block text-left py-2 px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

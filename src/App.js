@@ -18,6 +18,7 @@ import Applyform from "./components/Applyform";
 import About1 from "./pages/About1";
 import Softgetstart from "./pages/Services/Softgetstart";
 import Investments2 from "./pages/Services/Investments2";
+import Dashboard from "./pages/Dashboard";
 function App() {
   // global dark mode state
   const [darkMode, setDarkMode] = useState(() => {
@@ -58,6 +59,7 @@ function App() {
         <Route path="/services/company-tax" element={<CompanyTax />} />
         <Route path="/services/investments" element={<Investments />} />
         <Route path="/investments2" element={<Investments2 />} />
+        <Route path="/dashboard" element={<Dashboard />} />
 
         <Route path="/login" element={<LoginCard />} />
       </Routes>

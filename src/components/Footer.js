@@ -20,7 +20,7 @@ const Footer = ({ darkMode }) => {
   return (
     <footer
       className={`w-full pt-10 pb-6 px-6 lg:px-16 relative transition-all duration-700
-      ${loaded ? "opacity-100" : "opacity-0"}
+      ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}
       ${
         darkMode
           ? "bg-[#0b0b0b] text-gray-200"
@@ -28,19 +28,24 @@ const Footer = ({ darkMode }) => {
       }`}
     >
       <div
-        className={`absolute top-0 left-0 w-60 h-60 rounded-full blur-[80px]
+        className={`absolute top-0 left-0 w-60 h-60 rounded-full blur-[80px] transition-opacity duration-700
         ${darkMode ? "bg-white/5" : "bg-white/10"}`}
       ></div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-10 relative z-10">
         {/* LOGO + INTRO */}
         <div className="flex flex-col items-start gap-4">
-          <img
-            src="/images/logok.png"
-            alt="KDastsho Logo"
-            className="w-24 md:w-28 rounded-full shadow-md hover:scale-105 transition-transform"
-          />
-          <h2 className="text-2xl font-bold">Kdastsho Fintech Solutions</h2>
+          <Link to="/" onClick={scrollToTop}>
+            <img
+              src="/images/logok.png"
+              alt="KDastsho Logo"
+              className="w-24 md:w-28 rounded-full shadow-md hover:scale-105 hover:shadow-[0_0_18px_#DB6A2E] transition-all duration-500 cursor-pointer"
+            />
+          </Link>
+
+          <h2 className="text-2xl font-bold tracking-wide">
+            Kdastsho Fintech Solutions
+          </h2>
           <p
             className={`${
               darkMode ? "text-gray-400" : "text-gray-200"
@@ -55,14 +60,15 @@ const Footer = ({ darkMode }) => {
             {[FaFacebookF, FaInstagram, FaLinkedinIn].map((Icon, i) => (
               <div
                 key={i}
-                className={`w-8 h-8 flex justify-center items-center rounded-full border cursor-pointer
-                transition duration-300
+                className={`w-9 h-9 flex justify-center items-center rounded-full border cursor-pointer relative isolate overflow-hidden
+                transition-all duration-300 hover:-translate-y-1
                 ${
                   darkMode
                     ? "border-white/40 hover:bg-white hover:text-black"
                     : "border-white/40 hover:bg-white hover:text-black"
                 }`}
               >
+                <span className="absolute inset-0 scale-0 group-hover:scale-150 opacity-10 bg-white transition-transform duration-500 rounded-full"></span>
                 <Icon size={16} />
               </div>
             ))}
@@ -72,68 +78,57 @@ const Footer = ({ darkMode }) => {
         {/* COMPANY */}
         <div className="flex flex-col gap-3">
           <h3 className="text-xl font-semibold mb-1">Company</h3>
-
-          <Link
-            to="/Blog"
-            className={`cursor-pointer text-base transition-all hover:translate-x-1
-            ${darkMode ? "hover:text-white" : "hover:text-gray-300"}`}
-          >
-            Blog
-          </Link>
-          <Link
-            to="/about"
-            className={`cursor-pointer text-base transition-all hover:translate-x-1
-            ${darkMode ? "hover:text-white" : "hover:text-gray-300"}`}
-          >
-            About Us
-          </Link>
-          <Link
-            to="/contact"
-            className={`cursor-pointer text-base transition-all hover:translate-x-1
-            ${darkMode ? "hover:text-white" : "hover:text-gray-300"}`}
-          >
-            Contact Us
-          </Link>
-          <Link
-            to="/Careers"
-            className={`cursor-pointer text-base transition-all hover:translate-x-1
-            ${darkMode ? "hover:text-white" : "hover:text-gray-300"}`}
-          >
-            Career
-          </Link>
+          {[
+            { label: "Blog", link: "/Blog" },
+            { label: "About Us", link: "/about" },
+            { label: "Contact Us", link: "/contact" },
+            { label: "Career", link: "/Careers" },
+          ].map((item, i) => (
+            <Link
+              key={i}
+              to={item.link}
+              className={`cursor-pointer text-base transition-all group 
+              ${darkMode ? "hover:text-white" : "hover:text-gray-100"}`}
+            >
+              <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
+                {item.label}
+              </span>
+              <div className="h-[2px] w-0 group-hover:w-full transition-all duration-500 bg-white/70 rounded"></div>
+            </Link>
+          ))}
         </div>
 
         {/* SERVICES */}
         <div className="flex flex-col gap-3">
           <h3 className="text-xl font-semibold mb-1">Services</h3>
-
-          <Link
-            to="/services/software-development"
-            className={`cursor-pointer text-base transition-all hover:translate-x-1
-            ${darkMode ? "hover:text-white" : "hover:text-gray-300"}`}
-          >
-            Software Development
-          </Link>
-          <Link
-            to="/services/company-tax"
-            className={`cursor-pointer text-base transition-all hover:translate-x-1
-            ${darkMode ? "hover:text-white" : "hover:text-gray-300"}`}
-          >
-            Company Registration & Tax Filing
-          </Link>
-          <Link
-            to="/services/investments"
-            className={`cursor-pointer text-base transition-all hover:translate-x-1
-            ${darkMode ? "hover:text-white" : "hover:text-gray-300"}`}
-          >
-            Investment Service
-          </Link>
+          {[
+            {
+              label: "Software Development",
+              link: "/services/software-development",
+            },
+            {
+              label: "Company Registration & Tax Filing",
+              link: "/services/company-tax",
+            },
+            { label: "Investment Service", link: "/services/investments" },
+          ].map((item, i) => (
+            <Link
+              key={i}
+              to={item.link}
+              className={`cursor-pointer text-base transition-all group
+              ${darkMode ? "hover:text-white" : "hover:text-gray-100"}`}
+            >
+              <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
+                {item.label}
+              </span>
+              <div className="h-[2px] w-0 group-hover:w-full transition-all duration-500 bg-white/70 rounded"></div>
+            </Link>
+          ))}
         </div>
 
         {/* ADDRESS */}
         <div className="flex flex-col gap-4">
           <h3 className="text-xl font-semibold mb-1">Address</h3>
-
           <div>
             <p className="font-semibold">Head Office</p>
             <p
@@ -146,25 +141,7 @@ const Footer = ({ darkMode }) => {
               Mobile: 9113831872 <br />
               <a
                 href="mailto:info@kdasthofintechsolutions.com"
-                className="underline cursor-pointer hover:text-white"
-              >
-                info@kdasthofintechsolutions.com
-              </a>
-            </p>
-          </div>
-
-          <div>
-            <p className="font-semibold">Branch Office</p>
-            <p
-              className={`${
-                darkMode ? "text-gray-400" : "text-gray-100"
-              } text-base leading-relaxed`}
-            >
-              52, 5th Cross, Manjunadha Layout, Marathahalli, Bangalore 560037
-              <br />
-              <a
-                href="mailto:info@kdasthofintechsolutions.com"
-                className="underline cursor-pointer hover:text-white"
+                className="underline cursor-pointer hover:text-white transition-all"
               >
                 info@kdasthofintechsolutions.com
               </a>
@@ -175,15 +152,26 @@ const Footer = ({ darkMode }) => {
 
       {/* COPYRIGHT */}
       <div
-        className={`text-center text-lg mt-6 font-medium
+        className={`text-center text-lg mt-6 font-medium relative z-10
         ${darkMode ? "text-gray-400" : "text-gray-200"}`}
       >
-        Kdastshofintechsolutionspvt.ltd 2025 &nbsp;|&nbsp;
-        <Link to="/terms" className="cursor-pointer hover:text-white">
+        <span className="text-gray-200">© {new Date().getFullYear()}</span>
+        &nbsp;
+        <span className="font-semibold bg-gradient-to-r from-[#F69B2E] to-[#DB6A2E] bg-clip-text text-transparent animate-[shine_3s_ease-in-out_infinite]">
+          Kdaastsho Fintech Solutions India
+        </span>
+        &nbsp;|&nbsp;
+        <Link
+          to="/terms"
+          className="cursor-pointer hover:scale-105 transition-all duration-300 hover:drop-shadow-[0_0_6px_#DB6A2E]"
+        >
           Terms & Conditions
         </Link>
         &nbsp;|&nbsp;
-        <Link to="/privacy" className="cursor-pointer hover:text-white">
+        <Link
+          to="/privacy"
+          className="cursor-pointer hover:scale-105 transition-all duration-300 hover:drop-shadow-[0_0_6px_#DB6A2E]"
+        >
           Privacy Policy
         </Link>
       </div>
@@ -192,7 +180,7 @@ const Footer = ({ darkMode }) => {
       <button
         onClick={scrollToTop}
         className={`fixed bottom-6 right-6 shadow-lg w-11 h-11 rounded-full flex justify-center items-center
-        transition-all duration-300
+        transition-all duration-300 hover:scale-110 hover:shadow-[0_0_20px_rgba(255,255,255,0.6)]
         ${
           darkMode
             ? "bg-white/90 text-black hover:bg-white"

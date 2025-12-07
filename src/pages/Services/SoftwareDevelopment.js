@@ -311,15 +311,7 @@ const ComplexSolutionsPage = () => {
                 </li>
               </ul>
 
-              <motion.div className="mt-6" variants={fadeIn}>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={darkButtonClass}
-                >
-                  Get a Quote
-                </motion.button>
-              </motion.div>
+              <motion.div className="mt-6" variants={fadeIn}></motion.div>
             </motion.div>
           </motion.div>
         </section>

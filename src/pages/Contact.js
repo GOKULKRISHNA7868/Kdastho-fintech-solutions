@@ -6,6 +6,10 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import useTheme from "../hooks/useTheme";
 
+// 🔥 Firebase imports
+import { db } from "../firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+
 // Fix default marker icon issue in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -26,6 +30,39 @@ const ContactUsSection = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+
+  // 🔥 Submit handler - store in Firebase
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!firstName || !lastName || !email || !phone || !message) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "contact_details"), {
+        firstName,
+        lastName,
+        email,
+        phone,
+        message,
+        createdAt: serverTimestamp(),
+      });
+
+      alert("Message submitted successfully!");
+
+      // Clear input fields
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setPhone("");
+      setMessage("");
+    } catch (error) {
+      console.error("Error saving contact details:", error);
+      alert("Failed to submit message!");
+    }
+  };
 
   // Animation Variants
   const slideInLeft = {
@@ -51,7 +88,6 @@ const ContactUsSection = () => {
     <section
       className={`relative z-0 pt-44 md:pt-48 pb-16 transition-colors duration-500 ${sectionBg}`}
     >
-      {/* Increased pt from pt-32/36 → pt-44/48 to avoid navbar overlap */}
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         {/* Heading */}
         <motion.div
@@ -79,7 +115,7 @@ const ContactUsSection = () => {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="flex flex-col md:flex-row gap-4">
                 <input
                   type="text"
@@ -144,7 +180,7 @@ const ContactUsSection = () => {
             >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                attribution="&copy; OpenStreetMap contributors"
               />
               <Marker position={[28.6139, 77.209]}>
                 <Popup>KDASTSHO Fintech Solutions Pvt Ltd</Popup>
