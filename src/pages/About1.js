@@ -131,7 +131,7 @@ const AboutUsSection = () => {
           className={`w-24 h-1 mx-auto mt-2 rounded-full ${headingColor}`}
         ></div>
 
-        <div className="grid md:grid-cols-4 gap-10 mt-16">
+        <div className="grid md:grid-cols-3 gap-10 mt-16">
           {[
             {
               img: "/images/ceo.jpg",
@@ -152,10 +152,22 @@ const AboutUsSection = () => {
               desc: "A tech visionary building intelligent, scalable products that convert challenges into opportunities.",
             },
             {
+              img: "/images/gokul.jpg",
+              name: "TUPAKULA GOKUL KRISHNA",
+              role: "Full Stack Developer",
+              desc: "A tech visionary building intelligent, scalable products that convert challenges into opportunities.",
+            },
+            {
               img: "/images/sharanya.jpg",
               name: "Gajula Sharanya",
               role: "Chief Operating Officer (COO)",
               desc: "An operations expert transforming data into strategic decisions that accelerate growth.",
+            },
+            {
+              img: "/images/swathi.jpg",
+              name: "Bujaranpally Harini",
+              role: "Software Developer",
+              desc: "A tech visionary building intelligent, scalable products that convert challenges into opportunities.",
             },
           ].map((member, i) => (
             <motion.div
