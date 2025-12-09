@@ -149,13 +149,13 @@ const AboutUsSection = () => {
               img: "/images/harini.jpg",
               name: "Bujaranpally Harini",
               role: "UX/UI Designer",
-              desc: "A tech visionary building intelligent, scalable products that convert challenges into opportunities.",
+              desc: "A future-focused tech creator crafting smart and scalable products that redefine challenges as opportunities.",
             },
             {
               img: "/images/gokul.jpg",
               name: "TUPAKULA GOKUL KRISHNA",
               role: "Full Stack Developer",
-              desc: "A tech visionary building intelligent, scalable products that convert challenges into opportunities.",
+              desc: "A passionate tech builder developing intelligent, scalable products that turn every challenge into an opportunity.",
             },
             {
               img: "/images/sharanya.jpg",
