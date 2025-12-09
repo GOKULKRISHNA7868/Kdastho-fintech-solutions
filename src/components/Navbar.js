@@ -56,6 +56,8 @@ export default function Navbar() {
     { name: "About", to: "/About1" },
     { name: "Careers", to: "/Careers" },
     { name: "Blog", to: "/Blog" },
+    { name: "Spin", to: "/Home" },
+
     // ❌ Dashboard removed from public nav — now shown only in user dropdown when admin
     {
       name: "Services",

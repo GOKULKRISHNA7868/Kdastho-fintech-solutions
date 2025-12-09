@@ -83,6 +83,8 @@ const Footer = ({ darkMode }) => {
             { label: "About Us", link: "/about" },
             { label: "Contact Us", link: "/contact" },
             { label: "Career", link: "/Careers" },
+            { label: "Advertise With Us 🚀", link: "/ads" },
+            { label: "Rewards", link: "/Rewards" },
           ].map((item, i) => (
             <Link
               key={i}

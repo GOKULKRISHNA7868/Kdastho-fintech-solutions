@@ -52,6 +52,47 @@ export default function EditProfile() {
     "Ladakh",
   ];
   const genders = ["Male", "Female", "Other"];
+  const [bookedCalls, setBookedCalls] = useState([]);
+  const fetchBookedCalls = async (userId) => {
+    if (!userId) return;
+
+    const paths = ["Calls_from_investments", "Calls_from_softwareDevelopment"];
+
+    let allCalls = [];
+
+    for (const path of paths) {
+      const collectionRef = collection(db, path);
+      const q = query(collectionRef, where("uid", "==", userId));
+      const querySnap = await getDocs(q);
+      const calls = querySnap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        source: path,
+      }));
+      allCalls = [...allCalls, ...calls];
+    }
+
+    setBookedCalls(allCalls);
+  };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUid(user.uid);
+
+        // Fetch user profile
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) setUserData((prev) => ({ ...prev, ...snap.data() }));
+
+        // Fetch applications, registrations, and booked calls
+        fetchApplications(user.uid);
+        fetchRegistrations(user.uid);
+        fetchBookedCalls(user.uid); // <-- fetch calls
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const [userData, setUserData] = useState({
     firstName: "",
@@ -79,6 +120,7 @@ export default function EditProfile() {
       [name]: value,
     }));
   };
+  const [registrations, setRegistrations] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [uid, setUid] = useState(null);
@@ -116,6 +158,37 @@ export default function EditProfile() {
     await updateDoc(userRef, userData);
     alert("Profile updated successfully!");
   };
+  const fetchRegistrations = async (userId) => {
+    if (!userId) return;
+
+    // Use dynamic UID in the path
+    const regRef = collection(
+      db,
+      "REGISTER_DEATILS_INVESTMENTS",
+      userId, // <-- dynamic here
+      "user_registrations"
+    );
+
+    const q = query(regRef, where("uid", "==", userId));
+    const querySnap = await getDocs(q);
+    const regs = querySnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    setRegistrations(regs);
+  };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUid(user.uid);
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) setUserData((prev) => ({ ...prev, ...snap.data() }));
+
+        fetchApplications(user.uid);
+        fetchRegistrations(user.uid); // <-- dynamic path
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   if (loading)
     return (
@@ -149,6 +222,17 @@ export default function EditProfile() {
             Edit Profile
           </button>
           <button
+            onClick={() => setSelectedPage("registrations")}
+            className={`text-left px-4 py-2 rounded-md ${
+              selectedPage === "registrations"
+                ? "bg-gray-600"
+                : "hover:bg-gray-200 dark:hover:bg-gray-800"
+            }`}
+          >
+            My Registrations
+          </button>
+
+          <button
             onClick={() => setSelectedPage("applications")}
             className={`text-left px-4 py-2 rounded-md ${
               selectedPage === "applications"
@@ -157,6 +241,16 @@ export default function EditProfile() {
             }`}
           >
             My Applications
+          </button>
+          <button
+            onClick={() => setSelectedPage("bookedCalls")}
+            className={`text-left px-4 py-2 rounded-md ${
+              selectedPage === "bookedCalls"
+                ? "bg-gray-600"
+                : "hover:bg-gray-200 dark:hover:bg-gray-800"
+            }`}
+          >
+            My Booked Calls
           </button>
         </nav>
       </aside>
@@ -349,6 +443,142 @@ export default function EditProfile() {
                 </button>
               </div>
             </form>
+          </>
+        )}
+        {selectedPage === "registrations" && (
+          <>
+            <h1
+              className={`text-3xl font-bold mb-8 ${
+                darkMode ? "text-white" : "text-stone-900"
+              }`}
+            >
+              My Registrations
+            </h1>
+
+            {registrations.length === 0 ? (
+              <p
+                className={`text-lg ${
+                  darkMode ? "text-white" : "text-stone-900"
+                }`}
+              >
+                ⚠️ You haven't registered for any services yet.
+              </p>
+            ) : (
+              <div className="space-y-6">
+                {registrations.map((reg) => (
+                  <div
+                    key={reg.id}
+                    className={`p-6 rounded-lg shadow-md border space-y-3 ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700 text-white"
+                        : "bg-white border-gray-300 text-stone-900"
+                    }`}
+                  >
+                    <h2 className="text-2xl font-bold">{reg.serviceTitle}</h2>
+                    <p>
+                      <span className="font-semibold">Description:</span>{" "}
+                      {reg.serviceDescription}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Includes:</span>{" "}
+                      {reg.serviceIncludes}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Name:</span>{" "}
+                      {reg.firstName} {reg.lastName}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Email:</span> {reg.email}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Phone:</span> {reg.phone}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Details:</span>{" "}
+                      {reg.details}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Date:</span> {reg.date} |{" "}
+                      <span className="font-semibold">Time:</span> {reg.time}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Registration ID:</span>{" "}
+                      {reg.uid}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Application Status:</span>{" "}
+                      <span className="font-bold">{reg.status}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+        {selectedPage === "bookedCalls" && (
+          <>
+            <h1
+              className={`text-3xl font-bold mb-8 ${
+                darkMode ? "text-white" : "text-stone-900"
+              }`}
+            >
+              My Booked Calls
+            </h1>
+
+            {bookedCalls.length === 0 ? (
+              <p
+                className={`text-lg ${
+                  darkMode ? "text-white" : "text-stone-900"
+                }`}
+              >
+                ⚠️ You have no booked calls.
+              </p>
+            ) : (
+              <div className="space-y-6">
+                {bookedCalls.map((call) => (
+                  <div
+                    key={call.id}
+                    className={`p-6 rounded-lg shadow-md border space-y-2 ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700 text-white"
+                        : "bg-white border-gray-300 text-stone-900"
+                    }`}
+                  >
+                    <h2 className="text-2xl font-bold">
+                      {call.planTitle || call.solutionTitle}
+                    </h2>
+                    <p>
+                      <span className="font-semibold">Description:</span>{" "}
+                      {call.planDescription || call.solutionDescription}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Name:</span> {call.name}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Email:</span> {call.email}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Phone:</span> {call.phone}
+                    </p>
+                    {call.note && (
+                      <p>
+                        <span className="font-semibold">Note:</span> {call.note}
+                      </p>
+                    )}
+                    <p>
+                      <span className="font-semibold">Status:</span>{" "}
+                      <span className="font-bold">{call.status}</span>
+                    </p>
+                    <p className="text-sm opacity-80">
+                      Booked On:{" "}
+                      {call.createdAt?.toDate
+                        ? call.createdAt.toDate().toLocaleString()
+                        : call.createdAt}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
 

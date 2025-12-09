@@ -16,9 +16,11 @@ export default function Dashboard() {
     ads: [],
     contacts: [],
     users: [],
+    investorCalls: [],
+    softwareCalls: [],
   });
 
-  const [activeCollection, setActiveCollection] = useState("applications");
+  const [activeCollection, setActiveCollection] = useState("ads");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
@@ -36,10 +38,23 @@ export default function Dashboard() {
     const fetchAll = async () => {
       const applications = await fetchCollection("applications");
       const contactDetails = await fetchCollection("contact_details");
-      const ads = await fetchCollection("ads_info");
+      const ads = await fetchCollection("request_Ads");
       const contacts = await fetchCollection("contacts");
       const users = await fetchCollection("users");
-      setData({ applications, contactDetails, ads, contacts, users });
+      const investorCalls = await fetchCollection("Calls_from_investments");
+      const softwareCalls = await fetchCollection(
+        "Calls_from_softwareDevelopment"
+      );
+
+      setData({
+        applications,
+        contactDetails,
+        ads,
+        contacts,
+        users,
+        investorCalls,
+        softwareCalls,
+      });
     };
 
     fetchAll();
@@ -48,22 +63,43 @@ export default function Dashboard() {
   const collections = [
     { key: "applications", label: "Applications" },
     { key: "contactDetails", label: "Contact Details" },
-    { key: "ads", label: "Ads Info" },
+    { key: "ads", label: "Requested Ads" },
     { key: "contacts", label: "Contacts" },
     { key: "users", label: "Users" },
+    { key: "investorCalls", label: "Booked Calls from Investors" },
+    { key: "softwareCalls", label: "Software Development Calls" },
   ];
 
-  const handleReviewUpdate = async (id, field, value) => {
+  const handleReviewUpdate = async (id, value) => {
     try {
-      await updateDoc(doc(db, "applications", id), { [field]: value });
+      const collectionMap = {
+        ads: { firestore: "request_Ads", field: "status" },
+        contactDetails: { firestore: "contact_details", field: "status" },
+        investorCalls: {
+          firestore: "Calls_from_investments",
+          field: "status",
+        },
+        softwareCalls: {
+          firestore: "Calls_from_softwareDevelopment",
+          field: "status",
+        },
+        applications: { firestore: "applications", field: "reviewStatus" },
+        contacts: { firestore: "contacts", field: "status" },
+        users: { firestore: "users", field: "status" },
+      };
+
+      const { firestore, field } = collectionMap[activeCollection];
+
+      await updateDoc(doc(db, firestore, id), { [field]: value });
+
       setData((prev) => ({
         ...prev,
-        applications: prev.applications.map((item) =>
+        [activeCollection]: prev[activeCollection].map((item) =>
           item.id === id ? { ...item, [field]: value } : item
         ),
       }));
     } catch (err) {
-      console.error("Error updating review:", err);
+      console.error("Error updating status:", err);
     }
   };
 
@@ -74,21 +110,20 @@ export default function Dashboard() {
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     )
-    .filter((item) =>
-      statusFilter
-        ? item.reviewStatus?.toLowerCase() === statusFilter.toLowerCase()
-        : true
-    );
+    .filter((item) => {
+      if (!statusFilter) return true;
+      const checkField =
+        activeCollection === "applications" ? item.reviewStatus : item.status;
+      return checkField?.toLowerCase() === statusFilter.toLowerCase();
+    });
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Navbar */}
       <nav className="bg-white dark:bg-gray-900 shadow-md h-16 flex items-center px-6">
         <h1 className="text-2xl font-bold dark:text-white">Admin Dashboard</h1>
       </nav>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
         <aside className="bg-white dark:bg-gray-800 w-64 flex-shrink-0 p-4 shadow-md overflow-y-auto">
           {collections.map((col) => (
             <button
@@ -105,7 +140,6 @@ export default function Dashboard() {
           ))}
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1 p-6 overflow-auto">
           <div className="flex justify-between items-center mb-4 flex-col md:flex-row gap-2">
             <h2 className="text-xl font-semibold dark:text-white">
@@ -119,7 +153,9 @@ export default function Dashboard() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="p-2 rounded shadow border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
-              {activeCollection === "applications" && (
+
+              {(activeCollection === "ads" ||
+                activeCollection === "applications") && (
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -146,7 +182,6 @@ export default function Dashboard() {
         </main>
       </div>
 
-      {/* Modal */}
       {selectedRow && (
         <Modal row={selectedRow} onClose={() => setSelectedRow(null)} />
       )}
@@ -154,32 +189,33 @@ export default function Dashboard() {
   );
 }
 
-// Section Wrapper
 const Section = ({ children }) => (
   <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
     {children}
   </div>
 );
 
-// Table Component
 const Table = ({ data, updateReview, activeCollection, onRowClick }) => {
   if (data.length === 0)
     return <p className="dark:text-white">No data available.</p>;
 
   const columns = Object.keys(data[0]);
 
+  const fieldName =
+    activeCollection === "applications" ? "reviewStatus" : "status";
+
   const getStatusClass = (status) => {
     switch (status) {
       case "Pending":
-        return "bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100";
+        return "bg-yellow-200 text-yellow-800";
       case "Progressing":
-        return "bg-blue-200 text-blue-800 dark:bg-blue-700 dark:text-blue-100";
+        return "bg-blue-200 text-blue-800";
       case "Accepted":
-        return "bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-100";
+        return "bg-green-200 text-green-800";
       case "Rejected":
-        return "bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-100";
+        return "bg-red-200 text-red-800";
       default:
-        return "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100";
+        return "bg-gray-300 text-gray-800";
     }
   };
 
@@ -210,16 +246,13 @@ const Table = ({ data, updateReview, activeCollection, onRowClick }) => {
                   key={col}
                   className="p-2 border border-gray-300 dark:border-gray-600"
                 >
-                  {activeCollection === "applications" &&
-                  (col === "reviewStatus" || col === "adminReview") ? (
+                  {col === fieldName ? (
                     <select
-                      value={row[col] || "Pending"}
-                      onChange={(e) =>
-                        updateReview(row.id, col, e.target.value)
-                      }
+                      value={row[fieldName] || "Pending"}
                       onClick={(e) => e.stopPropagation()}
-                      className={`p-1 rounded border border-gray-300 dark:border-gray-600 ${getStatusClass(
-                        row[col] || "Pending"
+                      onChange={(e) => updateReview(row.id, e.target.value)}
+                      className={`p-1 rounded ${getStatusClass(
+                        row[fieldName] || "Pending"
                       )}`}
                     >
                       <option value="Pending">Pending</option>
@@ -227,10 +260,10 @@ const Table = ({ data, updateReview, activeCollection, onRowClick }) => {
                       <option value="Accepted">Accepted</option>
                       <option value="Rejected">Rejected</option>
                     </select>
-                  ) : Array.isArray(row[col]) ? (
-                    row[col].join(", ")
                   ) : row[col]?.seconds ? (
                     new Date(row[col].seconds * 1000).toLocaleString()
+                  ) : Array.isArray(row[col]) ? (
+                    row[col].join(", ")
                   ) : row[col] ? (
                     row[col].toString()
                   ) : (
@@ -246,13 +279,12 @@ const Table = ({ data, updateReview, activeCollection, onRowClick }) => {
   );
 };
 
-// Modal Component
 const Modal = ({ row, onClose }) => (
-  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center p-4">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
     <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-3xl p-6 relative overflow-auto max-h-[90vh]">
       <button
         onClick={onClose}
-        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300"
       >
         ✖
       </button>

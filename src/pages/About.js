@@ -39,45 +39,6 @@ const AboutUsSection = () => {
   const [wheelSize, setWheelSize] = useState(300);
 
   // Prize list with icons
-  const prizes = [
-    { text: "50 K Coins", icon: "🪙" },
-    { text: "New Shoes", icon: "👟" },
-    { text: "Better Luck Next Time", icon: "💔" },
-    { text: "Movie Tickets", icon: "🎬" },
-    { text: "Gadgets", icon: "📱" },
-    { text: "₹5", icon: "💸" },
-  ];
-
-  useEffect(() => {
-    const spun = localStorage.getItem("hasSpunWheel");
-    if (!spun) setShowSpinWheel(true);
-
-    const resizeHandler = () =>
-      setWheelSize(Math.min(window.innerWidth * 0.7, 350));
-    resizeHandler();
-    window.addEventListener("resize", resizeHandler);
-    return () => window.removeEventListener("resize", resizeHandler);
-  }, []);
-
-  const spinWheel = () => {
-    const prizeIndex = Math.floor(Math.random() * prizes.length);
-    const degreesPerPrize = 360 / prizes.length;
-
-    const finalRotation =
-      360 * 8 + prizeIndex * degreesPerPrize + degreesPerPrize / 2;
-
-    setRotation(finalRotation);
-
-    setTimeout(() => {
-      setHasSpun(true);
-      setPrize(prizes[prizeIndex]);
-      localStorage.setItem("hasSpunWheel", "true");
-      setCelebrate(true);
-      setShowResultPopup(true);
-
-      setTimeout(() => setCelebrate(false), 4000);
-    }, 4700);
-  };
 
   const textColor = darkMode ? "text-white" : "text-gray-900";
 
@@ -265,83 +226,6 @@ const AboutUsSection = () => {
     <section
       className={`pt-32 md:pt-36 pb-16 transition-colors duration-500 ${sectionBg} min-h-screen`}
     >
-      <AnimatePresence>
-        {showSpinWheel && !hasSpun && (
-          <motion.div
-            className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-white dark:bg-gray-800 rounded-3xl p-6 relative w-[92%] max-w-md text-center shadow-2xl"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-            >
-              <h2 className={`text-2xl font-bold mb-4 ${textColor}`}>
-                🎉 Spin the Wheel 🎉
-              </h2>
-
-              {/* 1. Wheel Container - Now a motion.div */}
-              <motion.div
-                className="relative rounded-full border-8 border-green-600 overflow-hidden"
-                style={{ width: wheelSize, height: wheelSize }}
-                // *** THE KEY CHANGE: APPLY ROTATION TO THE WHOLE WHEEL ***
-                animate={{ rotate: rotation }}
-                transition={{ duration: 5, ease: "easeOut" }} // Fast to slow stop
-              >
-                {/* 2. Prize Segments - These are now children of the rotating div */}
-                {prizes.map((p, i) => {
-                  const rotateDeg = (360 / prizes.length) * i;
-                  return (
-                    <div
-                      key={i}
-                      className="absolute w-full h-full flex justify-center items-start pt-3"
-                      // The prize division line background (optional, but shows segments)
-                      style={{
-                        transform: `rotate(${rotateDeg}deg)`,
-                        backgroundColor: i % 2 === 0 ? "#fef08a" : "#dcfce7", // Light yellow/green background for segments
-                      }}
-                    >
-                      <span
-                        className="text-sm font-bold absolute"
-                        // Must rotate back to stay upright relative to the screen
-                        style={{
-                          transform: `rotate(-${rotateDeg}deg)`,
-                          color: "#1f2937",
-                          marginTop: "20px", // Push text down a bit
-                        }}
-                      >
-                        {p.icon} {p.text}
-                      </span>
-                    </div>
-                  );
-                })}
-
-                {/* 3. CENTER HUB - Place this on top of the segments */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-12 h-12 rounded-full bg-green-700 border-4 border-white shadow-lg z-10"></div>
-                </div>
-              </motion.div>
-              {/* END OF WHEEL CONTAINER */}
-
-              {/* 4. POINTER/INDICATOR - Fixed in place above the wheel */}
-              <div className="absolute top-[28%] left-1/2 transform -translate-x-1/2 -translate-y-full">
-                <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-b-[20px] border-l-transparent border-r-transparent border-b-red-600"></div>
-              </div>
-
-              <button
-                onClick={spinWheel}
-                className="mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md text-lg font-semibold"
-              >
-                🔄 Spin
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* RESULT POPUP AFTER WIN (Rest of your code remains the same) */}
       <AnimatePresence>
         {showResultPopup && (

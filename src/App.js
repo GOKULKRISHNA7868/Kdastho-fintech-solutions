@@ -19,6 +19,9 @@ import About1 from "./pages/About1";
 import Softgetstart from "./pages/Services/Softgetstart";
 import Investments2 from "./pages/Services/Investments2";
 import Dashboard from "./pages/Dashboard";
+import Ads from "./pages/Ads";
+import Rewards from "./pages/Rewards";
+import Home from "./pages/Home";
 function App() {
   // global dark mode state
   const [darkMode, setDarkMode] = useState(() => {
@@ -51,11 +54,14 @@ function App() {
         <Route path="/signup" element={<SignUpForm />} />
         <Route path="/Applyform" element={<Applyform />} />
         <Route path="/softgetstart" element={<Softgetstart />} />
+        <Route path="/ads" element={<Ads />} />
+        <Route path="Rewards" element={<Rewards />} />
 
         <Route
           path="/services/software-development"
           element={<SoftwareDevelopment />}
         />
+        <Route path="/home" element={<Home />} />
         <Route path="/services/company-tax" element={<CompanyTax />} />
         <Route path="/services/investments" element={<Investments />} />
         <Route path="/investments2" element={<Investments2 />} />

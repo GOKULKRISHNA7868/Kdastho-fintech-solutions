@@ -1,7 +1,7 @@
 // src/components/KadasthoLanding.jsx
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const services = [
   {
@@ -53,56 +53,35 @@ const services = [
 ];
 
 const KadasthoLanding = () => {
+  const navigate = useNavigate();
+  const handleRegister = (service) =>
+    navigate("/register", { state: { service } });
+
   return (
     <div className="min-h-screen bg-[#F7F1EC] dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
-      {/* Spacer for fixed navbar */}
       <div className="h-20 md:h-24" />
 
-      {/* Header Section */}
-      <header className="flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-12 relative overflow-hidden">
-        {/* Left Text */}
+      {/* Header */}
+      <header className="flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-12 gap-10">
         <motion.div
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1 }}
           className="md:w-1/2 space-y-6"
         >
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="text-4xl md:text-5xl font-bold"
-          >
+          <h1 className="text-4xl md:text-5xl font-bold">
             Complete Company Registration & Tax Filing Solutions
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="text-lg md:text-xl text-gray-700 dark:text-gray-300"
-          >
+          </h1>
+          <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300">
             Quick setup, accurate filing, and complete legal support.
-          </motion.p>
-
-          {/* CTA Button */}
-          <motion.button
-            whileHover={{
-              scale: 1.05,
-              boxShadow: "0px 5px 15px rgba(0,0,0,0.3)",
-            }}
-            className="bg-[#8D5A3A] hover:bg-[#7a4b2f] text-white px-6 py-3 rounded-lg shadow-md transition-all duration-300"
-          >
-            <Link to="/register">Register</Link>
-          </motion.button>
+          </p>
         </motion.div>
 
-        {/* Right Image */}
         <motion.div
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1 }}
-          className="md:w-1/2 mt-8 md:mt-0 flex justify-center relative"
+          className="md:w-1/2 flex justify-center"
         >
           <motion.img
             src="/images/plain.png"
@@ -114,34 +93,44 @@ const KadasthoLanding = () => {
         </motion.div>
       </header>
 
-      {/* Services Section */}
-      <section className="px-6 md:px-20 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Services Cards */}
+      <section className="px-6 md:px-20 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {services.map((service, index) => (
             <motion.div
               key={service.id}
-              initial={{ opacity: 0, y: 50, rotate: -1 }}
-              whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.15 }}
+              transition={{ duration: 0.5, delay: index * 0.12 }}
               whileHover={{
                 scale: 1.03,
-                rotate: 0,
-                boxShadow: "0px 15px 25px rgba(0,0,0,0.2)",
-                borderBottom: "4px solid #B8860B", // gold accent
+                boxShadow: "0px 15px 25px rgba(0,0,0,0.15)",
               }}
-              className="border rounded-lg p-6 cursor-pointer border-transparent transition-all duration-300 bg-[#F7F1EC] dark:bg-gray-800"
+              className="border rounded-xl p-6 bg-white dark:bg-gray-800 flex flex-col justify-between"
             >
-              <h2 className="text-3xl font-bold text-[#B8860B] mb-2">
-                {service.id}
-              </h2>
-              <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
-              <p className="text-gray-700 dark:text-gray-300 mb-2">
-                {service.description}
-              </p>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
-                {service.includes}
-              </p>
+              <div>
+                <h2 className="text-3xl font-bold text-[#B8860B] mb-3">
+                  {service.id}
+                </h2>
+                <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
+                <p className="text-gray-700 dark:text-gray-300 mb-3">
+                  {service.description}
+                </p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {service.includes}
+                </p>
+              </div>
+
+              {/* Button always bottom & center */}
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => handleRegister(service)}
+                  className="bg-[#8D5A3A] hover:bg-[#704228] text-white px-5 py-2 rounded-lg shadow-md transition-all"
+                >
+                  Register for this Service
+                </button>
+              </div>
             </motion.div>
           ))}
         </div>
