@@ -160,7 +160,7 @@ const AboutUsSection = () => {
             {
               img: "/images/sharanya.jpg",
               name: "Gajula Sharanya",
-              role: "Chief Operating Officer (COO)",
+              role: "Senior Developer",
               desc: "An operations expert transforming data into strategic decisions that accelerate growth.",
             },
             {
