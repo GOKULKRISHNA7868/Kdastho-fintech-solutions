@@ -134,26 +134,26 @@ const AboutUsSection = () => {
         <div className="grid md:grid-cols-4 gap-10 mt-16">
           {[
             {
-              img: "/images/team1.jpg",
-              name: "NAME",
+              img: "/images/ceo.jpg",
+              name: "Sudha Shashank Reddy",
               role: "Chief Executive Officer (CEO)",
               desc: "A strategic leader driving innovation, growth and sustainable digital transformation.",
             },
             {
-              img: "/images/team2.jpg",
-              name: "NAME",
-              role: "Chief Data Officer (CDO)",
+              img: "/images/hr.jpg",
+              name: "Kaipa Sai Ram Reddy",
+              role: "Human Resources of KDASTSHO FINTECH SOLUTIONS",
               desc: "A data-driven leader unlocking full business potential with secure and scalable data solutions.",
             },
             {
-              img: "/images/team3.jpg",
-              name: "NAMEi",
-              role: "Chief Technology Officer (CTO)",
+              img: "/images/harini.jpg",
+              name: "Bujaranpally Harini",
+              role: "UX/UI Designer",
               desc: "A tech visionary building intelligent, scalable products that convert challenges into opportunities.",
             },
             {
-              img: "/images/team4.jpg",
-              name: "NAME",
+              img: "/images/sharanya.jpg",
+              name: "Gajula Sharanya",
               role: "Chief Operating Officer (COO)",
               desc: "An operations expert transforming data into strategic decisions that accelerate growth.",
             },

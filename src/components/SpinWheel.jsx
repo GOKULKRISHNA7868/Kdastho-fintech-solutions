@@ -464,10 +464,6 @@ export default function SpinWheel({
             : "Spin"}
         </button>
 
-        <p className="text-xs text-slate-400">
-          Use Enter/Space to spin. When idle, use Left/Right arrow keys to nudge
-          the wheel.
-        </p>
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {announcement}
         </div>

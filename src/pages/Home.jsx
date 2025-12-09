@@ -144,7 +144,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-900 via-amber-800 to-orange-900 text-slate-50">
+    <div className="min-h-screen bg-gradient-to-b from-amber-900 via-amber-800 to-orange-900 text-slate-50 pt-20">
       <div className="mx-auto flex max-w-5xl flex-col items-center px-4 pb-10 pt-8 sm:pt-10">
         <header className="w-full max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-700 sm:text-sm">
